@@ -1,0 +1,12 @@
+# Attemp to have a minimal working configuration with opengl
+
+
+## Requirements
+
+1. download glfw from here https://www.glfw.org/download.html
+2. `cd glfw-x.y.z`
+3. `cmake -S . -B build`
+
+retrieve the `libgkfw3.a` from `build/src` and copy it to the extern folder
+
+

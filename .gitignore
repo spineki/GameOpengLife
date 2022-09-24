@@ -1,0 +1,11 @@
+# cpp output files
+*.o
+*.a
+
+# removing binary file
+main
+
+# glfw folder
+glfw-*/
+
+
