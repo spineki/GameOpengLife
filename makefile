@@ -13,10 +13,10 @@ LDFLAGS += -ldl
 main: main.o glad.o
 	g++ -o main main.o glad.o $(LDFLAGS)
 
-glad.o: src/glad.o
+glad.o: src/glad.c
 	g++ $(CFLAGS) -c src/glad.c
 
-main.o: src/main.cpp 
+main.o: src/main.cpp
 	g++ $(CFLAGS) -c src/main.cpp 
 
 
