@@ -1,14 +1,20 @@
 #version 330 core
+// not useful in the mandelbrot example anymore because we compute the color ourselves
 in vec3 vertexColor;
-
 out vec4 FragColor;
+
+uniform float center_x;
+uniform float center_y;
+uniform float zoom;
+uniform float screen_width;
+uniform float screen_height;
 
 #define MAX_NB_ITERATION 500
 
 int get_nb_iteration() {
-  // TODO: pass this as a parameter
-  float real = (gl_FragCoord.x / 1080.0 - 0.7) * 4.0;
-  float img = (gl_FragCoord.y / 1080.0 - 0.5) * 4.0;
+  // TODO: pass width and height  as a parameter
+  float real =  ((gl_FragCoord.x / screen_width - 0.7) * zoom + center_x) * 4.0f;
+  float img =   ((gl_FragCoord.y / screen_height - 0.5) * zoom + center_y) * 4.0f;
 
   int nb_iteration = 0;
   float const_real = real;
