@@ -1,7 +1,4 @@
 #version 330 core
-// not useful in the mandelbrot example anymore because we compute the color ourselves
-in vec3 vertexColor;
-
 // output color for the current fragment
 out vec4 FragColor;
 

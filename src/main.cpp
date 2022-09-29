@@ -224,14 +224,23 @@ int main()
     glDeleteShader(fragmentShaderId);
 
     // setting up vertex data, configuring vertex attributes
-
+    // 4 vertices to create 2 triangles
     // each "line" has this shape
-    /// x, y, z, r, g, b
+    /// x, y, z
     float vertices[] = {
-        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f};
+        -1.0f,
+        -1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        0.0f,
+        -1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        -1.0f,
+        0.0f,
+    };
 
     /** Creating a square from 2 triangles
         2 -- 1
@@ -260,12 +269,8 @@ int main()
     // FRAGMENT SHADER
     // ------------------------------------------
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-
-    // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
