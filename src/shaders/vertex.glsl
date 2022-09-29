@@ -4,7 +4,8 @@ layout(location = 1) in vec3 aColor;
 
 out vec3 vertexColor;
 
-
+// this shader is kept minimal on purpose
+// only creating a vertex at the given position
 void main()
 {
   gl_Position = vec4(aPos, 1.0);
