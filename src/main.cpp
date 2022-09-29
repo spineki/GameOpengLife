@@ -9,8 +9,8 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1080;
+const unsigned int SCR_HEIGHT = 1080;
 
 int main()
 {
@@ -48,7 +48,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "I need to sleep", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Mandelbrot", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -113,25 +113,40 @@ int main()
 
     // setting up vertex data, configuring vertex attributes
 
+    // each "line" has this shape
+    /// x, y, z, r, g, b
+
     float vertices[] = {
-        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-    	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
-    
+        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    	-1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+    	1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f
     };
+
+    /** Creating a square from 2 triangles
+        2 -- 1
+        |  / |
+        | /  |
+        0 -- 3
+    */
+    unsigned int indices[] = {
+        0, 1, 2,    // first triangle
+        0, 3, 1     // second triangle
+    };
+
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    // glGenBuffers(1, &EBO);
+    glGenBuffers(1, &EBO);
     
     // binding
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // FRAGMENT SHADER ---------------------
     // position
@@ -143,8 +158,8 @@ int main()
     glEnableVertexAttribArray(1);
     
 
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     // wireframe mode
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -164,7 +179,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);	
+	    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

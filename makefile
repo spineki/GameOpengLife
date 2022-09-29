@@ -1,3 +1,5 @@
+CC = g++
+
 CFLAGS = -I./include
 
 LDFLAGS = -L./extern
@@ -9,15 +11,17 @@ LDFLAGS += -lXrandr
 LDFLAGS += -lXi
 LDFLAGS += -ldl
 
+run: main
+	./main
 
 main: main.o glad.o
-	g++ -o main main.o glad.o $(LDFLAGS)
+	$(CC) -o main main.o glad.o $(LDFLAGS)
 
 glad.o: src/glad.c
-	g++ $(CFLAGS) -c src/glad.c
+	$(CC) $(CFLAGS) -c src/glad.c
 
 main.o: src/main.cpp
-	g++ $(CFLAGS) -c src/main.cpp 
+	$(CC) $(CFLAGS) -c src/main.cpp 
 
 
 
