@@ -1,6 +1,6 @@
 # Mandelbrot explorer in Opengl
 
-![alt text](https://github.com/spineki/openBrot/raw/master/src/assets/example_mandelbrot.jpg "Mandelbrot example")
+![alt text](./assets/example_mandelbrot.jpg "Mandelbrot example")
 
 This is a toy project written to better understand OpenGl.
 
