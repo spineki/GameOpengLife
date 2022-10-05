@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cmath>
 #include <random>
+#include <unistd.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -16,8 +17,8 @@ namespace screen
 
     const float zooming_translation_factor = 0.01f;
     const float zoom_scaling_factor = 0.02f;
-    unsigned int width = 256;
-    unsigned int height = 256;
+    unsigned int width = 512;
+    unsigned int height = 512;
     float center_x{0.0f};
     float center_y{0.0f};
     float zoom{1.0};
@@ -305,7 +306,24 @@ int main()
     unsigned int sourceTexture;
     glGenTextures(1, &sourceTexture);
     glBindTexture(GL_TEXTURE_2D, sourceTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+
+    int nb_pixel = screen::width * screen::height;
+    char *data = {new char[nb_pixel]{}};
+    for (int i = 0; i < nb_pixel; ++i)
+    {
+        if (i < nb_pixel / 2)
+        {
+            data[i] = 1;
+        }
+        else
+        {
+
+            data[i] = static_cast<unsigned int>(dist(mt)) % 2;
+        }
+        // data[i] = 1;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -363,10 +381,14 @@ int main()
 
     int colorAttachment = GL_COLOR_ATTACHMENT1;
 
+    int currentSourceTexture = sourceTexture;
+    int currentDestinationTexture = destinationTexture;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+
         fps::countFPS();
         // input
         // -----
@@ -378,14 +400,13 @@ int main()
         // render
         // --------------------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        glDrawBuffer(GL_COLOR_ATTACHMENT1);
+        glDrawBuffer(colorAttachment);
         glUseProgram(shaderProgramId);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glActiveTexture(GL_TEXTURE0);                                                // Texture unit 0
-        glBindTexture(GL_TEXTURE_2D, sourceTexture);                                 // setting the associated texture
-        glUniform1f(glGetUniformLocation(dispShaderProgramId, "source_texture"), 0); // 0first uniform value
-
         glClear(GL_COLOR_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE0);                                            // Texture unit 0
+        glBindTexture(GL_TEXTURE_2D, currentSourceTexture);                      // setting the associated texture
+        glUniform1f(glGetUniformLocation(shaderProgramId, "source_texture"), 0); // 0first uniform value
 
         glBindVertexArray(VAO); // try to remove this after (only used once)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -397,7 +418,7 @@ int main()
 
         glUseProgram(dispShaderProgramId);                                                // why?
         glActiveTexture(GL_TEXTURE0);                                                     // Texture unit 0
-        glBindTexture(GL_TEXTURE_2D, destinationTexture);                                 // setting the associated texture
+        glBindTexture(GL_TEXTURE_2D, currentDestinationTexture);                          // setting the associated texture
         glUniform1f(glGetUniformLocation(dispShaderProgramId, "destination_texture"), 0); // 0first uniform value
 
         // going back to default framebuffer
@@ -407,10 +428,26 @@ int main()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
+        // swaping with framebuffer color is going to receive next iteration
+        if (colorAttachment == GL_COLOR_ATTACHMENT1)
+        {
+            colorAttachment = GL_COLOR_ATTACHMENT0;
+        }
+        else
+        {
+            colorAttachment = GL_COLOR_ATTACHMENT1;
+        }
+
+        // but now, we need to use the new texture as the next source
+        int swap = currentDestinationTexture;
+        currentDestinationTexture = currentSourceTexture;
+        currentSourceTexture = swap;
+
         // swap buffer to display the painted frame
         glfwSwapBuffers(window);
         // poll IO events (mouse, keyboard)
         glfwPollEvents();
+        usleep(1'000 * 1000);
     }
 
     // cleaning up remaining objects
