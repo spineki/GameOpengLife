@@ -381,6 +381,10 @@ int main()
         glDrawBuffer(GL_COLOR_ATTACHMENT1);
         glUseProgram(shaderProgramId);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glActiveTexture(GL_TEXTURE0);                                                // Texture unit 0
+        glBindTexture(GL_TEXTURE_2D, sourceTexture);                                 // setting the associated texture
+        glUniform1f(glGetUniformLocation(dispShaderProgramId, "source_texture"), 0); // 0first uniform value
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO); // try to remove this after (only used once)
@@ -391,10 +395,10 @@ int main()
         // writting in default frame buffer
         // --------------------------------------
 
-        glUseProgram(dispShaderProgramId);                                     // why?
-        glActiveTexture(GL_TEXTURE0);                                          // Texture unit 0
-        glBindTexture(GL_TEXTURE_2D, destinationTexture);                      // setting the associated texture
-        glUniform1f(glGetUniformLocation(dispShaderProgramId, "texture1"), 0); // 0first uniform value
+        glUseProgram(dispShaderProgramId);                                                // why?
+        glActiveTexture(GL_TEXTURE0);                                                     // Texture unit 0
+        glBindTexture(GL_TEXTURE_2D, destinationTexture);                                 // setting the associated texture
+        glUniform1f(glGetUniformLocation(dispShaderProgramId, "destination_texture"), 0); // 0first uniform value
 
         // going back to default framebuffer
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
