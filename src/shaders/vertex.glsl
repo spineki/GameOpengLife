@@ -1,11 +1,11 @@
 #version 330 core
-layout(location = 0) in vec3 aPos;
+layout (location = 0) in vec3 aPos;
+layout (location = 2) in vec2 aTexCoord;
 
-out vec3 vertexColor;
+out vec2 TexCoord;
 
-// this shader is kept minimal on purpose
-// only creating a vertex at the given position
 void main()
 {
-  gl_Position = vec4(aPos, 1.0);
+	gl_Position = vec4(aPos, 1.0);
+	TexCoord = vec2(aTexCoord.x, aTexCoord.y); // todo, only xy
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <random>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -15,8 +16,8 @@ namespace screen
 
     const float zooming_translation_factor = 0.01f;
     const float zoom_scaling_factor = 0.02f;
-    unsigned int width = 1080;
-    unsigned int height = 1080;
+    unsigned int width = 256;
+    unsigned int height = 256;
     float center_x{0.0f};
     float center_y{0.0f};
     float zoom{1.0};
@@ -122,6 +123,11 @@ namespace fps
 int main()
 {
 
+    std::random_device rd;
+    // mersen twister
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> dist(0.0, 255.0);
+
     // Loading shaders files content
     // ------------------------------------------
     std::ifstream vertexShaderFile("src/shaders/vertex.glsl");
@@ -148,6 +154,18 @@ int main()
     const char *fragmentShaderSource = fragmentShaderFileString.c_str();
     fragmentShaderFile.close();
 
+    std::ifstream dispFragmentShaderFile("src/shaders/dispFragment.glsl");
+    if (!dispFragmentShaderFile.is_open())
+    {
+        std::cout << "could not open dispFragmentShaderFile" << std::endl;
+        std::exit(1);
+    }
+    std::stringstream dispFragmentStrStream;
+    dispFragmentStrStream << dispFragmentShaderFile.rdbuf();
+    std::string dispFragmentShaderFileString = dispFragmentStrStream.str();
+    const char *dispFragmentShaderSource = dispFragmentShaderFileString.c_str();
+    dispFragmentShaderFile.close();
+
     // Initialize and configure glfw
     // ------------------------------------------
     glfwInit();
@@ -157,7 +175,7 @@ int main()
 
     // create glfw window
     // ------------------------------------------
-    GLFWwindow *window = glfwCreateWindow(screen::width, screen::height, "Mandelbrot", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(screen::width, screen::height, "Game of no life", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -207,6 +225,33 @@ int main()
                   << infoLog << std::endl;
     }
 
+    // Create fragment shader
+    // ------------------------------------------
+    unsigned int dispFragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(dispFragmentShaderId, 1, &dispFragmentShaderSource, NULL);
+    glCompileShader(dispFragmentShaderId);
+
+    glGetShaderiv(dispFragmentShaderId, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(dispFragmentShaderId, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::DISP_FRAGMENT::COMPILATION_FAILED\n"
+                  << infoLog << std::endl;
+    }
+
+    unsigned int dispShaderProgramId = glCreateProgram();
+    glAttachShader(dispShaderProgramId, vertexShaderId);
+    glAttachShader(dispShaderProgramId, dispFragmentShaderId);
+    glLinkProgram(dispShaderProgramId);
+    glGetProgramiv(dispShaderProgramId, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(dispShaderProgramId, 512, NULL, infoLog);
+        std::cout << "ERROR::DISP_SHADER::PROGRAM::LINKING_FAILED\n"
+                  << infoLog << std::endl;
+    }
+
     // linking shader within a common Shader program
     unsigned int shaderProgramId = glCreateProgram();
     glAttachShader(shaderProgramId, vertexShaderId);
@@ -221,6 +266,7 @@ int main()
     }
     // once they are loaded into the shader program, we can get rid of initial shaders
     glDeleteShader(vertexShaderId);
+    glDeleteShader(dispFragmentShaderId);
     glDeleteShader(fragmentShaderId);
 
     // setting up vertex data, configuring vertex attributes
@@ -228,35 +274,68 @@ int main()
     // each "line" has this shape
     /// x, y, z
     float vertices[] = {
-        -1.0f,
-        -1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        0.0f,
-        -1.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        -1.0f,
-        0.0f,
-    };
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,   // x, y, z, tx, ty
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // x, y, z, tx, ty
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // x, y, z, tx, ty
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f}; // x, y, z, tx, ty
 
     /** Creating a square from 2 triangles
         2 -- 1
         |  / |
         | /  |
-        0 -- 3
+        3 -- 0
     */
     unsigned int indices[] = {
-        0, 1, 2, // first triangle
-        0, 3, 1  // second triangle
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
     };
 
-    unsigned int VBO, VAO, EBO;
+    // VBO = vertex buffer object
+    // VAO = vertex array object
+    // EBO = Element buffer object
+    unsigned int VBO, VAO, EBO, frameBuffer;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
+    // framebuffer
+    glGenFramebuffers(1, &frameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+    // creating a texture
+    unsigned int sourceTexture;
+    glGenTextures(1, &sourceTexture);
+    glBindTexture(GL_TEXTURE_2D, sourceTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // linking sourceTexture to the first color entry of the framebuffer
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sourceTexture, 0);
+
+    unsigned int destinationTexture;
+    glGenTextures(1, &destinationTexture);
+    glBindTexture(GL_TEXTURE_2D, destinationTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // linking destinationTexture to the first color entry of the framebuffer
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, destinationTexture, 0);
+
+    GLenum status;
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    switch (status)
+    {
+    case GL_FRAMEBUFFER_COMPLETE:
+        std::cout << "good" << std::endl;
+        break;
+    default:
+        std::cout << "error while checking" << std::endl;
+    }
+
+    std::cout << "glGetError" << glGetError() << std::endl;
 
     // bindings
     glBindVertexArray(VAO);
@@ -269,8 +348,10 @@ int main()
     // FRAGMENT SHADER
     // ------------------------------------------
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -278,6 +359,9 @@ int main()
     glUseProgram(shaderProgramId);
 
     std::cout << "launching main loop" << std::endl;
+
+    int colorAttachment = GL_COLOR_ATTACHMENT1;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -288,19 +372,36 @@ int main()
         processInput(window);
 
         // provinding parameters with uniform buffer
-        glUniform1f(glGetUniformLocation(shaderProgramId, "zoom"), screen::zoom);
-        glUniform1f(glGetUniformLocation(shaderProgramId, "center_x"), screen::center_x);
-        glUniform1f(glGetUniformLocation(shaderProgramId, "center_y"), screen::center_y);
-        glUniform1f(glGetUniformLocation(shaderProgramId, "screen_width"), screen::width);
-        glUniform1f(glGetUniformLocation(shaderProgramId, "screen_height"), screen::height);
+        //! reinit this later
 
         // render
         // --------------------------------------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        glUseProgram(shaderProgramId); // why?
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glDrawBuffer(colorAttachment);
+        glBindVertexArray(VAO); // try to remove this after (only used once)
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        // going back to default framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // writting in default frame buffer
+        // --------------------------------------
+
+        glUseProgram(dispShaderProgramId);                                     // why?
+        glUniform1f(glGetUniformLocation(dispShaderProgramId, "texture1"), 0); // 0first uniform value
+
+        glActiveTexture(GL_TEXTURE0);                     // Texture unit 0
+        glBindTexture(GL_TEXTURE_2D, destinationTexture); // setting the associated texture
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         // swap buffer to display the painted frame
         glfwSwapBuffers(window);

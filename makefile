@@ -1,4 +1,4 @@
-CC = g++
+CC = g++ -O3
 
 CFLAGS = -I./include
 
