@@ -311,16 +311,8 @@ int main()
     char *data = {new char[nb_pixel]{}};
     for (int i = 0; i < nb_pixel; ++i)
     {
-        if (i < nb_pixel / 2)
-        {
-            data[i] = 1;
-        }
-        else
-        {
 
-            data[i] = static_cast<unsigned int>(dist(mt)) % 2;
-        }
-        // data[i] = 1;
+        data[i] = static_cast<unsigned int>(dist(mt)) % 2;
     }
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
@@ -447,7 +439,7 @@ int main()
         glfwSwapBuffers(window);
         // poll IO events (mouse, keyboard)
         glfwPollEvents();
-        usleep(1'000 * 1000);
+        // usleep(1'000 * 1000);
     }
 
     // cleaning up remaining objects
