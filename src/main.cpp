@@ -350,6 +350,7 @@ int main()
     // position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+    // texture position
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -377,26 +378,25 @@ int main()
         // render
         // --------------------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        glUseProgram(shaderProgramId); // why?
+        glDrawBuffer(GL_COLOR_ATTACHMENT1);
+        glUseProgram(shaderProgramId);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawBuffer(colorAttachment);
         glBindVertexArray(VAO); // try to remove this after (only used once)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
-        // going back to default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // writting in default frame buffer
         // --------------------------------------
 
         glUseProgram(dispShaderProgramId);                                     // why?
+        glActiveTexture(GL_TEXTURE0);                                          // Texture unit 0
+        glBindTexture(GL_TEXTURE_2D, destinationTexture);                      // setting the associated texture
         glUniform1f(glGetUniformLocation(dispShaderProgramId, "texture1"), 0); // 0first uniform value
 
-        glActiveTexture(GL_TEXTURE0);                     // Texture unit 0
-        glBindTexture(GL_TEXTURE_2D, destinationTexture); // setting the associated texture
-
+        // going back to default framebuffer
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
@@ -413,6 +413,8 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+    glDeleteTextures(1, &sourceTexture);
+    glDeleteTextures(1, &destinationTexture);
     glDeleteProgram(shaderProgramId);
 
     // freeing GLFW ressources
