@@ -13,22 +13,22 @@ uniform sampler2D source_texture;
 void main()
 {
 
-    float self = texture(source_texture, TexCoord).r == 0 ? 0 : 1;
+    float self = texture(source_texture, TexCoord).r;
 
     //fetch each neighbor texel and current texel.
     //top row
-    int r00 = textureOffset(source_texture, TexCoord, ivec2(-1, 1)).r == 0 ? 0 : 1;
-    int r01 = textureOffset(source_texture, TexCoord, ivec2( 0, 1)).r == 0 ? 0 : 1;
-    int r02 = textureOffset(source_texture, TexCoord, ivec2( 1, 1)).r == 0 ? 0 : 1;
+    int r00 = int(textureOffset(source_texture, TexCoord, ivec2(-1, 1)).r);
+    int r01 = int(textureOffset(source_texture, TexCoord, ivec2( 0, 1)).r);
+    int r02 = int(textureOffset(source_texture, TexCoord, ivec2( 1, 1)).r);
  
     //middle row
-    int r10 = textureOffset(source_texture, TexCoord, ivec2(-1, 0)).r == 0 ? 0 : 1;
-    int r12 = textureOffset(source_texture, TexCoord, ivec2( 1, 0)).r == 0 ? 0 : 1;
+    int r10 = int(textureOffset(source_texture, TexCoord, ivec2(-1, 0)).r);
+    int r12 = int(textureOffset(source_texture, TexCoord, ivec2( 1, 0)).r);
    
     //bottom row
-    int r20 = textureOffset(source_texture, TexCoord, ivec2(-1,-1)).r == 0 ? 0 : 1;
-    int r21 = textureOffset(source_texture, TexCoord, ivec2( 0,-1)).r == 0 ? 0 : 1;
-    int r22 = textureOffset(source_texture, TexCoord, ivec2( 1,-1)).r == 0 ? 0 : 1;
+    int r20 = int(textureOffset(source_texture, TexCoord, ivec2(-1,-1)).r);
+    int r21 = int(textureOffset(source_texture, TexCoord, ivec2( 0,-1)).r);
+    int r22 = int(textureOffset(source_texture, TexCoord, ivec2( 1,-1)).r);
  
     int nb_neighbour =  (r00 + r01 + r02 +
                         r10       + r12 +

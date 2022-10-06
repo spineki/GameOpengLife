@@ -308,14 +308,14 @@ int main()
     glBindTexture(GL_TEXTURE_2D, sourceTexture);
 
     int nb_pixel = screen::width * screen::height;
-    char *data = {new char[nb_pixel]{}};
+    float *data = {new float[nb_pixel]{}};
     for (int i = 0; i < nb_pixel; ++i)
     {
 
         data[i] = static_cast<unsigned int>(dist(mt)) % 2;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_HALF_FLOAT, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -326,7 +326,7 @@ int main()
     unsigned int destinationTexture;
     glGenTextures(1, &destinationTexture);
     glBindTexture(GL_TEXTURE_2D, destinationTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, screen::width, screen::height, 0, GL_RED, GL_HALF_FLOAT, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
