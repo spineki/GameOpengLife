@@ -1,8 +1,26 @@
-# Mandelbrot explorer in Opengl
+# Conway's game of life in Opengl
 
-![alt text](./assets/example_mandelbrot.jpg "Mandelbrot example")
+This project aims to compute Conway's game of life entirely through opengl shaders
+It is a toy project written to better understand OpenGl, so it may not be as efficient as possible
+![alt text](./assets/example.jpg "Mandelbrot example")
 
-This is a toy project written to better understand OpenGl.
+## How does it works?
+
+1. Creation of a FrameBufferObject (FBO) containing two attachments: COLOR_ATTACHMENT0, COLOR_ATTACHMENT1 that are linked to two textures
+2. Filling COLOR_ATTACHMENT0 related texture with random data to init the grid
+3. While in the main loop, seletcting COLOR_ATTACHMENT1 as the destination for the next render
+4. Using a first shader program:
+
+- We create 2 triangles with an identity vertex shader
+- We render the next iteration of Conway's game of Life thanks to the fragment shader.
+- This shader will use COLOR_ATTACHMENT0 as a uniform texture to know the current grid step, then it can use current texture/pixel position provided by the vertex shader and output the final pixel color
+
+5. We now have the next iteration of Conway's game of ligne in COLOR_ATTACHMENT1 texture
+6. We switch back to default ouput, and we use a new shader program (dispShaderProgram) to simply render COLOR_ATTACHMENT0 to the screen
+7. Finally, we swap textures (only swapping pointers to avoid heavy copy). During the next iteration, we will use COLOR_ATTACHMENT0 for first output and use COLOR_ATTACHMENT_1 as last-iteration grid
+
+Note:
+We only use the R color canal for buffers because we only want to have a binary state (alive, dead)
 
 - The window is built with [GLFW](https://www.glfw.org)
 - [glad](https://glad.dav1d.de/) handles OpenGl function pointer loading
