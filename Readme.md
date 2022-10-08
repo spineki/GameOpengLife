@@ -2,7 +2,7 @@
 
 This project aims to compute Conway's game of life entirely through opengl shaders
 It is a toy project written to better understand OpenGl, so it may not be as efficient as possible
-![alt text](./assets/example.jpg "Mandelbrot example")
+![alt text](./assets/example_game_of_life.jpg "Game of life example")
 
 ## How does it works?
 
@@ -37,20 +37,14 @@ retrieve the `libgkfw3.a` from `build/src` and copy it to the extern folder
 
 in the source folder, type `make run`
 
-# Commands
-
-- directional arrows: move the viewport
-- left shift: zoom in
-- left ctrl: zoom out
-
 # Potential improvements
 
-- The project coul be nicer by using a full color map instead of just using a certain percent of green according to the number of iterations
+- The project could be better if we could change the resolution or interract with the screen to create new cells
 - FPS could be displayed in real time on the screen instead of relying on stdout.
 
 # Sources
 
 Heavily inspired by:
 
-- [mandelbrot implementation](https://physicspython.wordpress.com/2020/02/16/visualizing-the-mandelbrot-set-using-opengl-part-1/)
+- [for shader implementation](http://ryan-davey.weebly.com/conways-game-of-life-pixel-shader.html)
 - [for opengl setup](https://learnopengl.com/)
