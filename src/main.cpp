@@ -16,79 +16,13 @@ void processInput(GLFWwindow *window);
 namespace screen
 {
 
-    const float zooming_translation_factor = 0.01f;
-    const float zoom_scaling_factor = 0.02f;
     unsigned int width = 512;
     unsigned int height = 512;
-    float center_x{0.0f};
-    float center_y{0.0f};
-    float zoom{1.0};
 
     void set_dimensions(int _width, int _height)
     {
         width = _width;
         height = _height;
-    }
-
-    void move_up()
-    {
-        center_y = center_y + zooming_translation_factor * zoom;
-        // preventing center from exiting screeen
-        if (center_y > 1.0f)
-        {
-            center_y = 1.0f;
-        }
-    }
-
-    void move_down()
-    {
-        center_y = center_y - zooming_translation_factor * zoom;
-        // preventing center from exiting screeen
-        if (center_y < -1.0f)
-        {
-            center_y = -1.0f;
-        }
-    }
-
-    void move_left()
-    {
-        center_x = center_x - zooming_translation_factor * zoom;
-        // preventing center from exiting screeen
-        if (center_x < -1.0f)
-        {
-            center_x = -1.0f;
-        }
-    }
-
-    void move_right()
-    {
-        center_x = center_x + zooming_translation_factor * zoom;
-        // preventing center from exiting screeen
-        if (center_x > 1.0f)
-        {
-            center_x = 1.0f;
-        }
-    }
-
-    void zoom_in()
-    {
-        zoom = zoom * (1.0f - zoom_scaling_factor);
-        // minimal zoom
-        if (zoom < 0.00001f)
-        {
-            zoom = 0.00001f;
-        }
-    }
-
-    void zoom_out()
-    {
-
-        zoom = zoom * (1.0f + zoom_scaling_factor);
-        // max zoom
-        if (zoom > 1.0f)
-        {
-            zoom = 1.0f;
-        }
     }
 }
 
@@ -112,7 +46,7 @@ namespace fps
 
         double interval{current_time - last_frame_time};
         // we don't want to print the fps all the time. We sample the number of frames during one second
-        if (interval >= 1.0)
+        if (interval >= time_between_fps_display)
         {
             std::cout << "fps " << num_frame << " | " << 1000.0 * interval / num_frame << "ms / frame\n";
             num_frame = 0;
@@ -343,7 +277,13 @@ int main()
         std::cout << "error while checking framebuffer" << status << std::endl;
     }
 
-    std::cout << "glGetError" << glGetError() << std::endl;
+    int compiling_error = glGetError();
+
+    if (compiling_error != GL_NO_ERROR)
+    {
+
+        std::cout << "glGetError :" << compiling_error << std::endl;
+    }
 
     // bindings
     glBindVertexArray(VAO);
@@ -485,37 +425,6 @@ void processInput(GLFWwindow *window)
     {
         glfwSetWindowShouldClose(window, true);
     }
-
-    // going up
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        screen::move_up();
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        screen::move_down();
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    {
-        screen::move_left();
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    {
-        screen::move_right();
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-    {
-        screen::zoom_in();
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-    {
-        screen::zoom_out();
-    }
 }
 
 /**
@@ -526,5 +435,6 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height)
     // updating glViewPort dimensions
     glViewport(0, 0, width, height);
     // Saving current dimension
+    //! Currently, the windows is resize, but the texture are not reloaded, so this will lead to strange effects
     screen::set_dimensions(width, height);
 }
