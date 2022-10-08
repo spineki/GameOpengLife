@@ -374,6 +374,8 @@ int main()
     int current_source_texture = first_texture;
     int current_destination_texture = secondTexture;
 
+    glBindVertexArray(VAO);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -409,9 +411,7 @@ int main()
 
         // Now, rendering to the screen to use the shader
         // --------------------------------------
-        glBindVertexArray(VAO); // try to remove this after (only used once
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // writting now back in default frame buffer
@@ -428,9 +428,7 @@ int main()
         // going back to default framebuffer
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
 
         // swaping with framebuffer color is going to receive next iteration
         if (current_color_attachment == GL_COLOR_ATTACHMENT1)
