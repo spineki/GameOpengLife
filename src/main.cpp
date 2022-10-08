@@ -407,7 +407,8 @@ int main()
         // bind source texture
         glBindTexture(GL_TEXTURE_2D, current_source_texture); // setting the associated texture
         // pass it to the shader
-        glUniform1f(glGetUniformLocation(shader_program_id, "source_texture"), 0); // 0first uniform value
+        int source_texture_location = glGetUniformLocation(shader_program_id, "source_texture"); // setting the associated texture
+        glUniform1i(source_texture_location, 0);                                                 // 0 first uniform value
 
         // Now, rendering to the screen to use the shader
         // --------------------------------------
@@ -417,13 +418,24 @@ int main()
         // writting now back in default frame buffer
         // --------------------------------------
         // using the display shader, that will only display stored texture
-        glUseProgram(disp_shader_program_id); // why?
+        glUseProgram(disp_shader_program_id);
+        // going back to default framebuffer
+
         // for location 0
         glActiveTexture(GL_TEXTURE0); // Texture unit 0
+        // bind source texture
+        glBindTexture(GL_TEXTURE_2D, current_source_texture); // setting the associated texture
+
+        int previous_texture_location = glGetUniformLocation(disp_shader_program_id, "previous_texture"); // setting the associated texture
+        glUniform1i(previous_texture_location, 0);                                                        // 0 first uniform value
+
+        // pass it to the shader
+        // for location 1
+        glActiveTexture(GL_TEXTURE1); // Texture unit 1
         //  bind destination texture
         glBindTexture(GL_TEXTURE_2D, current_destination_texture); // setting the associated texture
-        // pass it to the shader
-        glUniform1f(glGetUniformLocation(disp_shader_program_id, "destination_texture"), 0); // 0first uniform value
+        int current_texture_location = glGetUniformLocation(disp_shader_program_id, "current_texture");
+        glUniform1i(current_texture_location, 1);
 
         // going back to default framebuffer
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

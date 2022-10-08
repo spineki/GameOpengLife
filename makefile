@@ -1,4 +1,4 @@
-CC = clang++ -O3
+CC = clang++ -O3 -Wall
 
 CFLAGS = -I./include
 
